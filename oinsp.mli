@@ -1,0 +1,1 @@
+val inspect : 'a -> unit
