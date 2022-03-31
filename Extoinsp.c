@@ -56,7 +56,7 @@ CAMLprim value inspect (value v, value m)
                             [env]
          header ::= wosize color (closure-tag | infix-tag)
          info   ::= arity env-start
-	 env    ::= { value }+ code-pointer   (???? Not sure) */
+	 env    ::= { value }+ code-pointer  */
 	
 	while (ptr < ep) { 
 	  // print header 
