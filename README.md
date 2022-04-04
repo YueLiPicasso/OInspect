@@ -4,22 +4,25 @@ Inspector for OCaml runtime values
 ## What it does
 
 Use this library to inspect runtime integer and block values of OCaml, which shall be compiled using the 
-native code compiler `ocamlopt`. The following block tags are supported:
+native code compiler. The following block tags are supported:
 
-- non-constant constructor tags : 0 ~ 245  
-- closure tag                   : 247
-- infix tag                     : 249
-- string tag                    : 252
-- double tag                    : 253
-- double array tag              : 254
+|      Tag Name                 | Tag Value |
+| -------------                 | --------- |
+| non-constant constructor tags | 0 ~ 245  |
+| closure tag                   |  247     |
+| object tag                    |  248     |
+| infix tag                     |  249     |
+| abstract tag                  |  251     |
+| string tag                    |  252     |
+| double tag                    |  253     |
+| double array tag              |  254     |
+| custom tag                    | 255      |
+
 
 Currently unsupported tags:
 
 - lazy tag : 246
-- object tag : 248
 - forward tag : 250
-- abstract tag : 251
-- custom tag : 255
 
 ## Compatibility
 

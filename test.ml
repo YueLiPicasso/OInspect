@@ -1,6 +1,195 @@
 open Oinsp
 
+class addi =
+  object
+    val mutable li = [0;0;0;0]
+    val mutable fl = 7.77
+    val mutable mni = Some (Nativeint.minus_one)
+    method add a = fl <- (+.) fl a
+    method incr () = match mni with Some x -> (mni <- Some (Nativeint.succ x)) | _ -> ()
+    method get_fl () = fl
+    method get_mni () = mni
+   end
+
+let _ = let p = new addi in
+  begin
+    inspect (p#add);
+    inspect (p#incr);
+    inspect (p#get_fl);
+    inspect (p#get_mni);
+  end
+
+let _ = inspect (new addi)
+
+let _ = inspect [new addi; new addi; new addi; new addi]
+
+class point =
+   object
+     val mutable x = 0
+     method get_x = x
+     method move d = x <- x + d
+     method jump d = x <- x * d
+     method set_x nx = x <- nx
+   end
+
+
+let _ = let p = new point in
+  begin
+    inspect (p#get_x);
+    inspect (p#move);
+    inspect (p#jump);
+    inspect (p#set_x);
+  end
+
+let _ = inspect (new point)
+
+let _ = inspect [new point; new point; new point; new point]
+
+let _ = inspect (Int64.minus_one)
+
+let _ = inspect (Int64.(neg (succ (succ (succ zero)))))
+
+let _ = inspect (Int32.minus_one)
+
+let _ = inspect (Int32.(neg (succ (succ (succ zero)))))
+
+let _ = inspect (Nativeint.minus_one)
+
+let _ = inspect (Nativeint.(neg (succ (succ (succ zero)))))
+
+let _ = inspect @@ Stream.of_list ["0.1";"0.2";"0.3"]
+
+let _ = inspect @@ Stream.of_list [0.1;0.2;0.3]
+
+let _ = inspect @@ Stream.of_list [1;2;3;4]
+    
+let _ = inspect Uchar.bom
+
+(* abstract tag *)
+let _ = let wa = Weak.create 4 in
+  begin
+    inspect wa;
+    Weak.set wa 0 (Some ['A']);
+    inspect wa;
+    Weak.set wa 1(Some ['B']);
+    inspect wa;
+    Weak.set wa 2 (Some ['C']);
+    inspect wa;
+    Weak.set wa 3 (Some ['D']);
+    inspect wa;
+    inspect @@ Weak.length wa
+  end
+
+let _ = inspect "\000\001\002\003"
+
+let _ = let ht = Hashtbl.create 16 in
+  inspect begin
+    Hashtbl.add ht "sixteen" (16.00);
+    Hashtbl.add ht "sixteen" (1.6);
+    Hashtbl.add ht "sixteen" (0.16);
+    Hashtbl.add ht "tnt" (13.00);
+    ht
+  end
+
+let _ = inspect (0.1)
+let _ = inspect [| 0.1; 0.3; 0.6|]
+
+let _ =
+  let gstat = Gc.stat () and gget = Gc.get () in
+  inspect gstat; inspect gget
+
+let bf = Buffer.create 8
+let _ = inspect bf
+
+let sum_six = fun a -> fun b c d e f -> a + b + c + d + e + f
+let psum1 a = sum_six a
+let psum2 a b = sum_six a b 
+
+let _ = inspect (sum_six 1 2 3 4 5)
+let _ = inspect (psum1   1 2 3 4 5)
+let _ = inspect (psum2   1 2 3 4 5)
+
+let sum_six_1 = fun a -> fun b c d e f -> a + b + c + d + e + f
+let sum_six_2 = fun a b -> fun c d e f -> a + b + c + d + e + f
+let sum_six_3 = fun a b c -> fun d e f -> a + b + c + d + e + f
+let sum_six_4 = fun a b c d -> fun e f -> a + b + c + d + e + f
+let sum_six_5 = fun a b c d e -> fun f -> a + b + c + d + e + f
+let sum_six_6 = fun a b c d e f -> a + b + c + d + e + f
+
+
+(* all have arity 6 *)
+let _ = inspect sum_six_1 
+let _ = inspect sum_six_2
+let _ = inspect sum_six_3
+let _ = inspect sum_six_4
+let _ = inspect sum_six_5
+    
+let _ = inspect sum_six_6
+
+(* all have arity 6 *)
+let _ = inspect @@ Sys.opaque_identity sum_six_1
+let _ = inspect @@ Sys.opaque_identity sum_six_2
+let _ = inspect @@ Sys.opaque_identity sum_six_3
+let _ = inspect @@ Sys.opaque_identity sum_six_4
+let _ = inspect @@ Sys.opaque_identity sum_six_5
+let _ = inspect @@ Sys.opaque_identity sum_six_6
+                  
+                                   
+let psum1 a         = sum_six_1 a           (* arity in info: 1; actual: 6 *)
+let psum2 a b       = sum_six_1 a b         (* arity in info: 2; actual: 6 *)
+let psum3 a b c     = sum_six_1 a b c       (* arity in info: 3; actual: 6 *)
+let psum4 a b c d   = sum_six_1 a b c d     (* arity in info: 4; actual: 6 *)
+let psum5 a b c d e = sum_six_1 a b c d e   (* arity in info: 5; actual: 6 *)
+
+let _ = inspect psum1
+let _ = inspect psum2
+let _ = inspect psum3
+let _ = inspect psum4
+let _ = inspect psum5
+ 
+let _ = inspect @@ psum1 1
+let _ = inspect @@ psum1 1 2
+let _ = inspect @@ psum1 1 2 3
+let _ = inspect @@ psum1 1 2 3 4 
+let _ = inspect @@ psum1 1 2 3 4 5  (* a cascade of partial application *)
+    
+let tuple_sum_with_more_1a = fun (x,y,z) ->  let sum = x + y + z in
+  fun a b -> sum + a + b
+let tuple_sum_with_more_1b (x,y,z) = let sum = x + y + z in
+  fun a b -> sum + a + b
+             
+let tuple_sum_with_more_2a = fun (x,y,z) a -> let sum = x + y + z in
+  fun b -> sum + a + b
+let tuple_sum_with_more_2b (x,y,z) a = let sum = x + y + z in
+  fun b -> sum + a + b
+           
+
+let tuple_sum_with_more = tuple_sum_with_more_1b
+let f = Sys.opaque_identity tuple_sum_with_more
+
+(* using Sys.opaque_identity makes no difference *)
+let _ = inspect tuple_sum_with_more
+let _ = inspect f
+
+(* same arity : -3 *)
+let _ = inspect tuple_sum_with_more_1a
+let _ = inspect tuple_sum_with_more_1b
+
+(* same arity : 2 *)   
+let _ = inspect tuple_sum_with_more_2a
+let _ = inspect tuple_sum_with_more_2b
+
 let plus : int -> int -> int -> int = fun x y z -> x + y + z
+
+let foo = plus 1
+let bar x = plus x
+let quu x = plus 1 x
+let lee x y = plus x y
+
+let _ = inspect foo (* detected arity : 2; actually 2 as well *)
+let _ = inspect bar (* detected arity : 1; actually 3 *)
+let _ = inspect quu (* detected arity : 1; actually 2 *)
+let _ = inspect lee (* detected arity : 2; actually 3 *)
 
 let _ = inspect @@ List.fold_right (plus 0) [1;2;3] 
 
@@ -65,8 +254,7 @@ let _ = inspect (let a = 1 and b = 2 in fun x -> x + a + b)
 let _ = inspect (let a = 1 and b = 2 and c = 3 in fun x -> x + a + b + c)
 let _ = inspect (let a = 1 and b = 2 and c = 3 and d = [10;11;12;13]
                  in fun x -> x + a + b + c + List.fold_right (+) d 0)
-    
-         
+            
 let a,b,c,d,e,f,g,h,i = 1,2,3,4,5,6,7,8,9
 
 let _ = inspect (fun x -> x + a)
@@ -120,8 +308,7 @@ let _ = inspect "abcdefgh1234567\001\002\002\127\240"
 let _ = inspect ""
 let _ = inspect "\255\252\000\000\000"
 let _ = inspect @@ Bytes.of_string "\255\252\000\000\000"
-
-                   
+                 
 type ('a, 'b) node =
     Nil
   | Cons  of 'a * 'b
@@ -163,39 +350,30 @@ let tb : int rseqnc = (Cons(101, Cons(102, Table [(of_list [103;104;105;106]);
 let _ = inspect tb
 let _ = inspect of_list 
 let _ = inspect flatten
+let _ = inspect interleave 
 let _ = inspect @@ interleave (of_list [1;2;3])
 
-
-                 
-
-
-
-
-
-
-(* mutual recursion where each is a partial application *)
-let rec f x y z =  plus x ((g y) z)
-and g x = h x x
-and h x y = foo  x y y
-and foo x y z = f x y z
+(* mutual recursion *)                              
+let rec f x y  = g x y 
+and g x y = h x x y 
+and h x y z = foo x (y z) 
+and foo x y  = f x y 
 
 let _ = inspect f
-let _ = inspect (foo 1 2)
-let _ = inspect (f 10 11)
-let _ = let k = h 4 in inspect k
-    
-let bar = h 4
-let _ = inspect bar
+let _ = inspect g
+let _ = inspect h
+let _ = inspect foo
+let _ = inspect @@ foo succ
 
-    
 
 (* none-termination of the c code
 type 'a ll = Nil | Cons of 'a * ('a ll Lazy.t)
 let _ = let rec ones = Cons(1, lazy ones) in inspect (lazy ones)
 *)
 (* segfault
+let _ = inspect @@ Stream.of_channel stdin
+let _ = inspect stdin
+let _ = inspect stdout
+let _ = inspect stderr
 let _ = inspect @@ Printf.printf "Hello, %s!\n"
-*)
-(* let triple_sum (x,y,z) = x + y + z 
-let _ = inspect triple_sum
 *)

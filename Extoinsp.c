@@ -11,6 +11,7 @@ Developed with OCaml 4.12.0  */
 
 #define Color_hd(hd)   ((color_t)((hd >> 8) & ((header_t) 3)))
 #define mprintf        margin(m);printf
+#define DBPC 20 // precision for printing a double 
 
 // data from the same level are printed with the same margin 
 void margin (value n)
@@ -22,7 +23,7 @@ CAMLprim value inspect (value v, value m)
   printf("\n");
   mprintf("OCaml Value : %0#18lX\n", v);
   if (Is_long(v)) {
-    mprintf(" Is integer : %ld (in decimal)\n", Long_val(v));
+    mprintf(" Is integer : %ld (decimal)\n", Long_val(v));
   }
   else if (Is_block(v))
     {
@@ -109,19 +110,22 @@ CAMLprim value inspect (value v, value m)
 			  infix_offset, top_v);
 	
       } else if (tag == Double_tag) {
-	
 	mprintf("              double tag : %u\n", tag);
-	mprintf("    Field 0 : %0#18lX ... raw hex\n", hp[1]);
+	mprintf("    Field 0 : %0#18lX (raw hex)\n", hp[1]);
+	mprintf("              %.*f (decimal; precision %d)\n",
+		DBPC, ((double*)(hp))[1], DBPC);
 	
       } else if (tag == Double_array_tag) {
 	
 	mprintf("              double array tag : %u\n", tag);
 	for (mlsize_t i = 0; i < wosize; i++) {
-	  margin(m); printf("    field %lu : %0#18lX ...  raw hex\n", i, hp[1+i]); }
+	  mprintf("    Field %lu : %0#18lX (raw hex)\n", i, hp[1+i]);
+	  mprintf("              %.*f (decimal; precision %d)\n",
+		  DBPC, ((double*)(hp))[1+i], DBPC);}
 	
       } else if (tag == String_tag) {
 	
-	margin(m); printf("              string tag : %u\n", tag);
+	mprintf("              string tag : %u\n", tag);
 	// string pointer : first byte of first field
 	const  unsigned char * str = (unsigned char *)(v);
 	// pointer to the last byte of last field
@@ -130,27 +134,55 @@ CAMLprim value inspect (value v, value m)
 	const unsigned char lb = *lbp;
 	// pointer to the byte after the last byte of the OCaml string
 	const unsigned char * olbp = lbp - lb;
-	// print the original OCaml string
-	printf("OCaml string/bytes : ");
-	for (unsigned char * i = (unsigned char*)str; i < olbp; i++)
-	  if (*i >= 33 && *i <= 126) printf("%c", *i); else printf("(#%d)", *i);
-	printf("\n");
 	mlsize_t id = 0;  // current str idx
 	// print all the bytes in all the fields
 	for (mlsize_t i = 0; i < wosize; i++) {
-	  mprintf("           Logical Field %lu :\n", i);
+	  mprintf("    Field %lu :\n", i);
 	  for (mlsize_t j = 0 ; j < sizeof(value); j++) {
 	    id = i * sizeof(value) + j;
 	    if (str[id] >= 33 && str[id] <= 126) {
-	      mprintf("                    Byte-%lu : %c\n", j, str[id]);
+	      mprintf("     Byte-%lu : %c\n", j, str[id]);
 	    } else {
-	      mprintf("                    Byte-%lu : (#%d)\n", j, str[id]);}}}
+	      mprintf("     Byte-%lu : (#%d)\n", j, str[id]);}}}
+	// print the original OCaml string
+	mprintf("    OCaml string/bytes : ");
+	for (unsigned char * i = (unsigned char*)str; i < olbp; i++)
+	  if (*i >= 33 && *i <= 126) printf("%c", *i); else printf("(#%d)", *i);
+	printf("\n");
 	
-      } else { // non-constant constructor, non-float array, record, tuple, etc
+	// values of an OCaml abstract type may NOT have an abstract tag 
+      } else if (tag == Abstract_tag) { 
 	
-	mprintf("              tag : %u\n", tag);
+	mprintf("              abstract tag : %u\n", tag);
+	for (mlsize_t i = 0; i < wosize; i++) {
+	  mprintf("    Field %lu : %0#18lX (raw hex)\n", i, hp[1+i]); }
+	
+      } else if (tag == Custom_tag) { 
+	
+	mprintf("              custom tag : %u\n", tag);
+	mprintf("    Field 0 : %0#18lX (raw hex) ... method suit pointer\n", hp[1]); 
+	mprintf("    Field 1 : %0#18lX (raw hex) ... data\n", hp[2]); 
+	
+      } else if (tag == Object_tag) {
+
+	mprintf("              object tag : %u\n", tag);
+	const intnat class_id = Class_val(v);
+	const intnat obj_id   = Oid_val(v);
 	for (mlsize_t i = 0 ; i < wosize ; i++) {
-	  mprintf("Field %lu:", i);
+	  if (i == 0) {// method suit pointer
+	    mprintf("    Field %lu : method suit pointer %0#18lX\n", i, class_id);
+	  } else if (i == 1) { // object id
+	    mprintf("    Field %lu : object (decimal) id %ld\n", i, obj_id);
+	  } else { // instance variable values
+	    mprintf("    Field %lu:", i);
+	    inspect(Field(v,i), Val_long(m + 4));
+	  }
+	}
+	
+      } else  { // non-constant constructor, non-float array, record, tuple, etc
+	mprintf("              Constr. tag : %u\n", tag);
+	for (mlsize_t i = 0 ; i < wosize ; i++) {
+	  mprintf("    Field %lu :", i);
 	  inspect(Field(v,i), Val_long(m + 4)); }}
     }
   return Val_unit;
