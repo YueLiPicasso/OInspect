@@ -74,7 +74,7 @@ CAMLprim value inspect (value v, value m)
 	    mprintf("              closure tag : %u\n", Tag_hd(Hd_hp(ptr))); }    
 	  // print main code pointer   
 	  ptr++;
-	  mprintf("    Field %lu : %0#18lX ... code partial appl.\n",
+	  mprintf("    Field %lu : %0#18lX ... code pointer.\n",
 		  (mlsize_t)(ptr-(uintnat*)v), *ptr);
 	  // print info
 	  ptr++;
@@ -84,8 +84,8 @@ CAMLprim value inspect (value v, value m)
 	  mprintf("              Env.  : %lu\n", Start_env_closinfo(*ptr));
 	  // print optional code pointer
 	  ptr++;
-	  if (arity != 1) { // total function appl. code next
-	    mprintf("    Field %lu : %0#18lX ... code total appl.\n",
+	  if (arity != 1 && arity != 0) { // total function appl. code next
+	    mprintf("    Field %lu : %0#18lX ... code pointer\n",
 		    (mlsize_t)(ptr-(uintnat*)v), *ptr);
 	    ptr++; }} // end of while (ptr < ep)
 	// print env
@@ -105,8 +105,8 @@ CAMLprim value inspect (value v, value m)
 	const mlsize_t  infix_offset = Wosize_hd(hd); // the size field of hd is wosize
 	const value     top_v        = (value)((value *)(v) - infix_offset);
 	mprintf("       Code : %0#18lX\n", (unsigned long)(*cpp));
-	mprintf("Closure defined by mutual recursion.\n");
-	mprintf("Refer to field %ld of OCaml object %0#18lX.\n",
+	mprintf("      Closure defined by mutual recursion.\n");
+	mprintf("      Refer to field %ld of OCaml object %0#18lX.\n",
 			  infix_offset, top_v);
 	
       } else if (tag == Double_tag) {

@@ -1,5 +1,6 @@
 open Oinsp
 
+
 class addi =
   object
     val mutable li = [0;0;0;0]
@@ -116,17 +117,13 @@ let sum_six_4 = fun a b c d -> fun e f -> a + b + c + d + e + f
 let sum_six_5 = fun a b c d e -> fun f -> a + b + c + d + e + f
 let sum_six_6 = fun a b c d e f -> a + b + c + d + e + f
 
-
-(* all have arity 6 *)
 let _ = inspect sum_six_1 
 let _ = inspect sum_six_2
 let _ = inspect sum_six_3
 let _ = inspect sum_six_4
-let _ = inspect sum_six_5
-    
+let _ = inspect sum_six_5 
 let _ = inspect sum_six_6
 
-(* all have arity 6 *)
 let _ = inspect @@ Sys.opaque_identity sum_six_1
 let _ = inspect @@ Sys.opaque_identity sum_six_2
 let _ = inspect @@ Sys.opaque_identity sum_six_3
@@ -134,12 +131,11 @@ let _ = inspect @@ Sys.opaque_identity sum_six_4
 let _ = inspect @@ Sys.opaque_identity sum_six_5
 let _ = inspect @@ Sys.opaque_identity sum_six_6
                   
-                                   
-let psum1 a         = sum_six_1 a           (* arity in info: 1; actual: 6 *)
-let psum2 a b       = sum_six_1 a b         (* arity in info: 2; actual: 6 *)
-let psum3 a b c     = sum_six_1 a b c       (* arity in info: 3; actual: 6 *)
-let psum4 a b c d   = sum_six_1 a b c d     (* arity in info: 4; actual: 6 *)
-let psum5 a b c d e = sum_six_1 a b c d e   (* arity in info: 5; actual: 6 *)
+let psum1 a         = sum_six_1 a          
+let psum2 a b       = sum_six_1 a b        
+let psum3 a b c     = sum_six_1 a b c      
+let psum4 a b c d   = sum_six_1 a b c d    
+let psum5 a b c d e = sum_six_1 a b c d e  
 
 let _ = inspect psum1
 let _ = inspect psum2
@@ -151,7 +147,7 @@ let _ = inspect @@ psum1 1
 let _ = inspect @@ psum1 1 2
 let _ = inspect @@ psum1 1 2 3
 let _ = inspect @@ psum1 1 2 3 4 
-let _ = inspect @@ psum1 1 2 3 4 5  (* a cascade of partial application *)
+let _ = inspect @@ psum1 1 2 3 4 5  
     
 let tuple_sum_with_more_1a = fun (x,y,z) ->  let sum = x + y + z in
   fun a b -> sum + a + b
@@ -163,7 +159,6 @@ let tuple_sum_with_more_2a = fun (x,y,z) a -> let sum = x + y + z in
 let tuple_sum_with_more_2b (x,y,z) a = let sum = x + y + z in
   fun b -> sum + a + b
            
-
 let tuple_sum_with_more = tuple_sum_with_more_1b
 let f = Sys.opaque_identity tuple_sum_with_more
 
@@ -171,11 +166,9 @@ let f = Sys.opaque_identity tuple_sum_with_more
 let _ = inspect tuple_sum_with_more
 let _ = inspect f
 
-(* same arity : -3 *)
 let _ = inspect tuple_sum_with_more_1a
 let _ = inspect tuple_sum_with_more_1b
 
-(* same arity : 2 *)   
 let _ = inspect tuple_sum_with_more_2a
 let _ = inspect tuple_sum_with_more_2b
 
@@ -186,10 +179,10 @@ let bar x = plus x
 let quu x = plus 1 x
 let lee x y = plus x y
 
-let _ = inspect foo (* detected arity : 2; actually 2 as well *)
-let _ = inspect bar (* detected arity : 1; actually 3 *)
-let _ = inspect quu (* detected arity : 1; actually 2 *)
-let _ = inspect lee (* detected arity : 2; actually 3 *)
+let _ = inspect foo 
+let _ = inspect bar 
+let _ = inspect quu 
+let _ = inspect lee 
 
 let _ = inspect @@ List.fold_right (plus 0) [1;2;3] 
 
@@ -226,7 +219,6 @@ let _ = inspect f5
 let _ = inspect f6 
 let _ = inspect f7 
 
-
 let _ = inspect @@ f 1
 let _ = inspect @@ f 1 2
 let _ = inspect @@ f 1 2 3 
@@ -234,7 +226,6 @@ let _ = inspect @@ f 1 2 3 4
 let _ = inspect @@ f 1 2 3 4 5
 let _ = inspect @@ f 1 2 3 4 5 6
 let _ = inspect @@ f 1 2 3 4 5 6 7
-
 
 let _ = inspect ((fun x y -> x + y) 1)
 let _ = inspect ((fun x y z -> x + y + z) 1 2)
