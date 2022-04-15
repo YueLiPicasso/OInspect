@@ -1,6 +1,5 @@
 open Oinsp
 
-
 class addi =
   object
     val mutable li = [0;0;0;0]
@@ -92,6 +91,10 @@ let _ = let ht = Hashtbl.create 16 in
     ht
   end
 
+let _ = inspect (-100000023.45)
+let _ = inspect (23.45)
+let _ = inspect (1.1)
+let _ = inspect (1.0)
 let _ = inspect (0.1)
 let _ = inspect [| 0.1; 0.3; 0.6|]
 

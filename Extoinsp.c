@@ -115,6 +115,24 @@ CAMLprim value inspect (value v, value m)
 	mprintf("              %.*f (decimal; precision %d)\n",
 		DBPC, ((double*)(hp))[1], DBPC);
 	
+	for(char * bp = (char*)(hp + 1); bp < (char*)(hp + 2); bp++)
+	  {
+	    mprintf("         Byte %u : %.2hhX\n",
+		    (unsigned int)(bp - (char*)(hp + 1)), *bp);
+	  }
+
+	const header_t sign = hp[1] >> 63;          // sign bit
+	const header_t bexp = (hp[1] << 1) >> 53;   // biased exponent
+	const header_t frac = (hp[1] << 12) >> 12;  // fraction
+	const uintnat dfrac = ((uintnat)(0x3ff) << 52 | frac); // to exact the decimal fraction
+	  
+	mprintf("       sign bit : %lX\n", sign);
+	mprintf("biased exponent : %lX (hex) %ld (dec)\n", bexp, bexp);
+	mprintf("       exponent : %ld (dec)\n", bexp - 1023);
+	mprintf("       fraction : %lX (hex) %.*f (dec, precision %d)\n",
+		frac, DBPC, *(double*)(&dfrac) - 1.0, DBPC);
+	
+	
       } else if (tag == Double_array_tag) {
 	
 	mprintf("              double array tag : %u\n", tag);
