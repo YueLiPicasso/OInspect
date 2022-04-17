@@ -1,5 +1,20 @@
 open Oinsp
 
+let _ = inspect 0.0
+let _ = inspect (-0.0)
+let _ = inspect 0X0.0123_4567_89AB_C__P-1022
+let _ = inspect 0X1234_5678_9ABC__P-1074
+let _ = inspect (-0X0.0123_4567_89AB_C__P-1022)
+let _ = inspect 0X0.0000_0000_0000_1__P-1022
+let _ = inspect Float.min_float
+let _ = inspect 0X1.0000_0000_0000_1__P-1022
+let _ = inspect 0X1.FFFF_FFFF_FFFF_F__P1023
+let _ = inspect Float.max_float
+let _ = inspect Float.infinity
+let _ = inspect Float.neg_infinity
+let _ = inspect Float.nan
+let _ = inspect Float.(div min_float 2.0)
+        
 class addi =
   object
     val mutable li = [0;0;0;0]

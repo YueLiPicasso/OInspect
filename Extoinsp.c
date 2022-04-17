@@ -112,26 +112,22 @@ CAMLprim value inspect (value v, value m)
       } else if (tag == Double_tag) {
 	mprintf("              double tag : %u\n", tag);
 	mprintf("    Field 0 : %0#18lX (raw hex)\n", hp[1]);
-	mprintf("              %.*f (decimal; precision %d)\n",
-		DBPC, ((double*)(hp))[1], DBPC);
+       
+	const uintnat  sign = hp[1] >> 63;          // sign bit
+	const uintnat  bexp = (hp[1] << 1) >> 53;   // biased exponent
+	const uintnat  frac = (hp[1] << 12);  // fraction
 	
-	for(char * bp = (char*)(hp + 1); bp < (char*)(hp + 2); bp++)
-	  {
-	    mprintf("         Byte %u : %.2hhX\n",
-		    (unsigned int)(bp - (char*)(hp + 1)), *bp);
-	  }
-
-	const header_t sign = hp[1] >> 63;          // sign bit
-	const header_t bexp = (hp[1] << 1) >> 53;   // biased exponent
-	const header_t frac = (hp[1] << 12) >> 12;  // fraction
-	const uintnat dfrac = ((uintnat)(0x3ff) << 52 | frac); // to exact the decimal fraction
-	  
-	mprintf("       sign bit : %lX\n", sign);
-	mprintf("biased exponent : %lX (hex) %ld (dec)\n", bexp, bexp);
-	mprintf("       exponent : %ld (dec)\n", bexp - 1023);
-	mprintf("       fraction : %lX (hex) %.*f (dec, precision %d)\n",
-		frac, DBPC, *(double*)(&dfrac) - 1.0, DBPC);
+	#define is_zero  bexp == 0 && frac == 0
+	#define is_inf   bexp == 0X7FF && frac == 0
 	
+	// +/-zero, sub-norml, normal, +/-inf, NaN
+	if (is_zero && sign == 0)       { mprintf("Is +0\n"); }
+	if (is_zero && sign == 1)       { mprintf("Is -0\n"); }
+	if (bexp == 0 && frac != 0)     { mprintf("Is subnormal\n"); }
+	if (bexp != 0 && bexp != 0X7FF) { mprintf("Is normal\n"); }
+	if (is_inf && sign == 0)        { mprintf("Is +inf\n"); }
+	if (is_inf && sign == 1)        { mprintf("Is -inf\n"); }
+        if (bexp == 0X7FF && frac != 0) { mprintf("Is NaN\n"); }
 	
       } else if (tag == Double_array_tag) {
 	
